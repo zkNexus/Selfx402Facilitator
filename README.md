@@ -3,8 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Celo](https://img.shields.io/badge/Celo-Mainnet-green.svg)](https://celo.org/)
+[![Production](https://img.shields.io/badge/Production-Live-brightgreen.svg)](https://facilitator.selfx402.xyz/)
 
 A production-ready facilitator service for the x402 payment protocol with **Self Protocol integration** enabling proof-of-unique-human verification and tiered pricing on Celo blockchain.
+
+**🌐 Live Production Endpoint**: [https://facilitator.selfx402.xyz/](https://facilitator.selfx402.xyz/)
 
 ## 🚀 Overview
 
@@ -518,7 +521,7 @@ npm install selfx402-framework
 // src/config/x402.ts
 export const x402Config = {
   network: "celo" as const,
-  facilitatorUrl: process.env.FACILITATOR_URL || "https://your-domain.ngrok.io",
+  facilitatorUrl: process.env.FACILITATOR_URL || "https://facilitator.selfx402.xyz",
   paymentPrice: "0.001", // $0.001 USDC for verified humans
   walletAddress: process.env.PAYMENT_WALLET_ADDRESS!,
 };
@@ -603,7 +606,7 @@ import { PaymentForm } from "selfx402-pay-widget";
 export default function Home() {
   return (
     <PaymentForm
-      facilitatorUrl="https://your-domain.ngrok.io"
+      facilitatorUrl="https://facilitator.selfx402.xyz"
       vendorApiUrl="https://api.example.com"
       onSuccess={(result) => {
         console.log("Payment successful!", result);

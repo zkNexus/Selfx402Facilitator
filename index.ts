@@ -932,6 +932,309 @@ app.post("/settle-celo", async (req: Request, res: Response) => {
   }
 });
 
+// GET / - ASCII art landing page
+app.get("/", (_req: Request, res: Response) => {
+  const dbStatus = database ? '🟢 Connected (Supabase)' : '🟡 In-Memory Mode';
+  const deferredStatus = voucherDatabase ? '🟢 Enabled (x402 PR #426)' : '🔴 Disabled (requires database)';
+  const pollingStatus = verificationSessionsService ? '🟢 Enabled' : '🔴 Disabled (requires database)';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selfx402 Facilitator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      color: #58a6ff;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    pre {
+      color: #8b949e;
+      overflow-x: auto;
+    }
+    .ascii-art {
+      color: #58a6ff;
+      font-size: 12px;
+      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+    }
+    .status {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #21262d;
+    }
+    .status-item:last-child {
+      border-bottom: none;
+    }
+    .endpoint {
+      color: #79c0ff;
+      padding: 4px 8px;
+      margin: 2px 0;
+      background: #1c2128;
+      border-left: 3px solid #58a6ff;
+      display: block;
+    }
+    .method {
+      color: #7ee787;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .method.post {
+      color: #f78166;
+    }
+    h2 {
+      color: #58a6ff;
+      border-bottom: 2px solid #21262d;
+      padding-bottom: 10px;
+    }
+    a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .badge.success { background: #238636; color: #fff; }
+    .badge.warning { background: #9e6a03; color: #fff; }
+    .badge.error { background: #da3633; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <pre class="ascii-art">
+ ███████╗███████╗██╗     ███████╗██╗  ██╗██╗  ██╗ ██████╗ ██████╗
+ ██╔════╝██╔════╝██║     ██╔════╝╚██╗██╔╝██║  ██║██╔═████╗╚════██╗
+ ███████╗█████╗  ██║     █████╗   ╚███╔╝ ███████║██║██╔██║ █████╔╝
+ ╚════██║██╔══╝  ██║     ██╔══╝   ██╔██╗ ╚════██║████╔╝██║██╔═══╝
+ ███████║███████╗███████╗██║     ██╔╝ ██╗     ██║╚██████╔╝███████╗
+ ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝     ╚═╝ ╚═════╝ ╚══════╝
+
+ ███████╗ █████╗  ██████╗██╗██╗     ██╗████████╗ █████╗ ████████╗ ██████╗ ██████╗
+ ██╔════╝██╔══██╗██╔════╝██║██║     ██║╚══██╔══╝██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
+ █████╗  ███████║██║     ██║██║     ██║   ██║   ███████║   ██║   ██║   ██║██████╔╝
+ ██╔══╝  ██╔══██║██║     ██║██║     ██║   ██║   ██╔══██║   ██║   ██║   ██║██╔══██╗
+ ██║     ██║  ██║╚██████╗██║███████╗██║   ██║   ██║  ██║   ██║   ╚██████╔╝██║  ██║
+ ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+    </pre>
+
+    <div class="status">
+      <h2>🚀 System Status</h2>
+      <div class="status-item">
+        <span>Network</span>
+        <span><strong>${CELO_MAINNET.name}</strong> (Chain ID: ${CELO_MAINNET.chainId})</span>
+      </div>
+      <div class="status-item">
+        <span>USDC Contract</span>
+        <span><code>${CELO_MAINNET.usdcAddress}</code></span>
+      </div>
+      <div class="status-item">
+        <span>Database</span>
+        <span>${dbStatus}</span>
+      </div>
+      <div class="status-item">
+        <span>Deferred Payments</span>
+        <span>${deferredStatus}</span>
+      </div>
+      <div class="status-item">
+        <span>Deep Link Polling</span>
+        <span>${pollingStatus}</span>
+      </div>
+      <div class="status-item">
+        <span>Self Protocol</span>
+        <span>🟢 Enabled (proof-of-unique-human)</span>
+      </div>
+    </div>
+
+    <div class="status">
+      <h2>📡 Standard x402 Endpoints</h2>
+      <div class="endpoint">
+        <span class="method">GET</span>/supported
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Returns supported payment schemes (exact, deferred)</div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>/verify
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Verify x402 payment payload</div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>/settle
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Settle verified payment on-chain (EIP-3009)</div>
+      </div>
+    </div>
+
+    ${voucherDatabase ? `
+    <div class="status">
+      <h2>💎 Deferred Payment Endpoints <span class="badge success">x402 PR #426</span></h2>
+      <div class="endpoint">
+        <span class="method post">POST</span>/deferred/verify
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Verify and store off-chain voucher (99% gas savings)</div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>/deferred/settle
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Aggregate and settle vouchers on-chain</div>
+      </div>
+      <div class="endpoint">
+        <span class="method">GET</span>/deferred/balance/:payee
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Get accumulated unsettled balance</div>
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="status">
+      <h2>🔐 Self Protocol Endpoints</h2>
+      <div class="endpoint">
+        <span class="method post">POST</span>/verify-celo
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Verify Celo payment + Self proof (tiered pricing)</div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>/api/verify
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Self QR verification endpoint (deep link callback)</div>
+      </div>
+      ${verificationSessionsService ? `
+      <div class="endpoint">
+        <span class="method">GET</span>/verify-status/:sessionId
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Poll verification status (mobile-first flow)</div>
+      </div>
+      ` : ''}
+    </div>
+
+    <div class="status">
+      <h2>🛠️ System Endpoints</h2>
+      <div class="endpoint">
+        <span class="method">GET</span>/health
+        <div style="color: #8b949e; font-size: 12px; margin-top: 4px;">Health check with network info (JSON)</div>
+      </div>
+    </div>
+
+    <div class="status">
+      <h2>🔌 Quick Integration Guide</h2>
+      <p style="color: #8b949e; margin-bottom: 15px;">
+        Connect any API service to this facilitator in 3 simple steps:
+      </p>
+
+      <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin: 10px 0;">
+        <div style="color: #58a6ff; font-weight: bold; margin-bottom: 8px;">📦 Step 1: Install Framework</div>
+        <pre style="background: #161b22; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 5px 0;"><code>npm install selfx402-framework</code></pre>
+      </div>
+
+      <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin: 10px 0;">
+        <div style="color: #58a6ff; font-weight: bold; margin-bottom: 8px;">⚙️ Step 2: Configure Facilitator URL</div>
+        <pre style="background: #161b22; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 5px 0; font-size: 11px;"><code>// src/config/x402.ts
+export const x402Config = {
+  network: "celo",
+  facilitatorUrl: "https://facilitator.selfx402.xyz",
+  paymentPrice: "0.001", // $0.001 for verified humans
+  walletAddress: process.env.PAYMENT_WALLET_ADDRESS
+};</code></pre>
+      </div>
+
+      <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin: 10px 0;">
+        <div style="color: #58a6ff; font-weight: bold; margin-bottom: 8px;">🛡️ Step 3: Add Payment Middleware</div>
+        <pre style="background: #161b22; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 5px 0; font-size: 11px;"><code>import { celoPaymentMiddleware } from "selfx402-framework/middleware";
+
+const paymentMiddleware = celoPaymentMiddleware({
+  facilitatorUrl: x402Config.facilitatorUrl,
+  network: x402Config.network,
+  paymentPrice: x402Config.paymentPrice,
+  walletAddress: x402Config.walletAddress,
+  enableSelfProtocol: true, // Enable proof-of-unique-human
+});
+
+// Apply to protected routes
+app.get("/api/protected", paymentMiddleware, (req, res) => {
+  const tier = req.tier; // "verified_human" | "unverified"
+  res.json({ message: "Access granted!", tier });
+});</code></pre>
+      </div>
+
+      <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin: 10px 0;">
+        <div style="color: #58a6ff; font-weight: bold; margin-bottom: 8px;">✅ Step 4: Add Service Discovery (Optional but Recommended)</div>
+        <pre style="background: #161b22; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 5px 0; font-size: 11px;"><code>app.get("/.well-known/x402", (req, res) => {
+  res.json({
+    version: 1,
+    facilitatorUrl: "https://facilitator.selfx402.xyz",
+    payment: {
+      network: "celo",
+      asset: "${CELO_MAINNET.usdcAddress}",
+      payTo: x402Config.walletAddress,
+    },
+    verification: {
+      enabled: true,
+      requirements: {
+        minimumAge: 18,
+        excludedCountries: [], // ISO 3166-1 alpha-3
+        ofac: false,
+      },
+      scope: "my-api-v1", // Unique identifier
+    },
+    pricing: {
+      tiers: {
+        unverified: { price: "1.00", description: "Bot pricing" },
+        verified_human: { price: "0.001", description: "1000x cheaper" }
+      }
+    }
+  });
+});</code></pre>
+      </div>
+
+      <div style="background: #238636; color: #fff; padding: 12px; border-radius: 6px; margin-top: 15px;">
+        <strong>🎉 That's it!</strong> Your API now accepts:
+        <ul style="margin: 8px 0 0 20px; padding: 0;">
+          <li>x402 micropayments (EIP-712 signatures)</li>
+          <li>Self Protocol verification (proof-of-unique-human)</li>
+          <li>Tiered pricing (bots pay 1000x more)</li>
+          <li>Deferred payments (99% gas savings)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="status">
+      <h2>📚 Resources & Documentation</h2>
+      <p>
+        📦 NPM: <a href="https://www.npmjs.com/package/selfx402-framework" target="_blank">selfx402-framework</a><br>
+        📦 Widget: <a href="https://www.npmjs.com/package/selfx402-pay-widget" target="_blank">selfx402-pay-widget</a><br>
+        📖 Docs: <a href="https://github.com/zkNexus/Selfx402Facilitator" target="_blank">GitHub Repository</a><br>
+        🌐 Explorer: <a href="${CELO_MAINNET.blockExplorer}" target="_blank">${CELO_MAINNET.blockExplorer}</a><br>
+        🔗 x402: <a href="https://x402.gitbook.io" target="_blank">x402.gitbook.io</a><br>
+        🔑 Self Protocol: <a href="https://docs.self.xyz" target="_blank">docs.self.xyz</a>
+      </p>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; color: #484f58; font-size: 12px;">
+      <p>Built with ❤️ for the Self ZK Residency (Oct 14-31, 2025)</p>
+      <p>Self Protocol • x402 • Celo • TypeScript • Express • Supabase</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
+});
+
 // GET /health - Health check
 app.get("/health", (_req: Request, res: Response) => {
   res.json({
